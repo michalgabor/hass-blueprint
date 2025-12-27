@@ -12,14 +12,21 @@ Get up and running with Vitae Light Control in 5 minutes!
 
 ### 1. Install the Blueprint (30 seconds)
 
-**Option A: Manual**
+**Quick Install (Recommended)**
+
+[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fmichalgabor%2Fhass-blueprint%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fvitae_light_control.yaml)
+
+Click the button above to automatically import into your Home Assistant.
+
+**Manual Options**
+
+Option A: Download via command line
 ```bash
 cd /config/blueprints/automation/
-wget https://raw.githubusercontent.com/yourusername/vitae-light-blueprint/main/blueprints/automation/vitae_light_control.yaml
+wget https://raw.githubusercontent.com/michalgabor/hass-blueprint/main/blueprints/automation/vitae_light_control.yaml
 ```
 
-**Option B: Download**
-Download [vitae_light_control.yaml](blueprints/automation/vitae_light_control.yaml) and place it in `/config/blueprints/automation/`
+Option B: Download the [blueprint file](https://github.com/michalgabor/hass-blueprint/blob/main/blueprints/automation/vitae_light_control.yaml) and place it in `/config/blueprints/automation/`
 
 ### 2. Create Input Select (1 minute)
 

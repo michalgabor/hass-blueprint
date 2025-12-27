@@ -1,7 +1,8 @@
 # Vitae Light Control - Home Assistant Blueprint
 
-![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.1%2B-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.1%2B-blue.svg)](https://www.home-assistant.io)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-michalgabor%2Fhass--blueprint-blue?logo=github)](https://github.com/michalgabor/hass-blueprint)
 
 Intelligent Home Assistant blueprint for controlling Vitae biodynamic lights with optimized switching patterns and automatic reset detection.
 
@@ -40,34 +41,35 @@ Traditional approach requires resetting to evening for every mode change. This b
 
 ## Installation
 
-### Option 1: Manual Installation (Recommended)
+### Quick Install (Recommended)
 
-1. Download the blueprint file:
-   ```bash
-   cd /config/blueprints/automation/
-   wget https://raw.githubusercontent.com/yourusername/vitae-light-blueprint/main/blueprints/automation/vitae_light_control.yaml
-   ```
+[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fmichalgabor%2Fhass-blueprint%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fvitae_light_control.yaml)
 
-2. Or manually copy the file to:
-   ```
-   /config/blueprints/automation/vitae_light_control.yaml
-   ```
+Click the button above to automatically import the blueprint into your Home Assistant instance.
 
-3. Restart Home Assistant or reload automations
+### Manual Installation
 
-### Option 2: Import via URL
+**Option 1: Download via command line**
+```bash
+cd /config/blueprints/automation/
+wget https://raw.githubusercontent.com/michalgabor/hass-blueprint/main/blueprints/automation/vitae_light_control.yaml
+```
+
+**Option 2: Import via URL**
 
 1. In Home Assistant, go to **Settings** → **Automations & Scenes** → **Blueprints**
-2. Click the **Import Blueprint** button
+2. Click the **Import Blueprint** button (bottom right)
 3. Paste this URL:
    ```
-   https://github.com/yourusername/vitae-light-blueprint/blob/main/blueprints/automation/vitae_light_control.yaml
+   https://github.com/michalgabor/hass-blueprint/blob/main/blueprints/automation/vitae_light_control.yaml
    ```
 4. Click **Preview** and then **Import**
 
-### Option 3: HACS (Coming Soon)
+**Option 3: Manual copy**
 
-HACS support is planned for future releases.
+1. Download the [blueprint file](https://github.com/michalgabor/hass-blueprint/blob/main/blueprints/automation/vitae_light_control.yaml)
+2. Copy it to `/config/blueprints/automation/vitae_light_control.yaml`
+3. Restart Home Assistant or reload automations
 
 ## Configuration
 

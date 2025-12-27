@@ -21,7 +21,7 @@ blueprint:
 
   domain: automation
   author: Michal Gabor
-  source_url: https://github.com/yourusername/vitae-light-blueprint
+  source_url: https://github.com/michalgabor/hass-blueprint
 
   input:
     relay_switch:

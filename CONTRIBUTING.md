@@ -110,7 +110,7 @@ Before submitting changes, verify these scenarios:
 ## Project Structure
 
 ```
-vitae-light-blueprint/
+hass-blueprint/
 ├── blueprints/automation/
 │   └── vitae_light_control.yaml   # Main blueprint file
 ├── docs/

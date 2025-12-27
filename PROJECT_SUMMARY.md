@@ -15,7 +15,7 @@ This project provides a complete, production-ready Home Assistant blueprint for 
 ## Project Structure
 
 ```
-vitae-light-blueprint/
+hass-blueprint/
 ├── blueprints/
 │   └── automation/
 │       └── vitae_light_control.yaml    (372 lines) - Main blueprint
