@@ -190,14 +190,8 @@ action:
           - condition: template
             value_template: "{{ target_pos >= current_pos and target_pos != -1 }}"
         sequence:
-          # Ensure switch is on first
-          - service: switch.turn_on
-            target:
-              entity_id: !input relay_switch
-          - delay:
-              seconds: !input switch_delay
-
-          # Perform switch cycles
+          # Perform switch cycles (OFF-ON for each step)
+          # Don't do initial turn_on as it would advance the mode!
           - repeat:
               count: "{{ switches_needed }}"
               sequence:
