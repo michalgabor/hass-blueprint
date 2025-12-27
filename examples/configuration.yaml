@@ -1,0 +1,374 @@
+# ==============================================================================
+# Vitae Light Control - Configuration Example
+# ==============================================================================
+# This file shows how to configure the Vitae Light Control blueprint
+# in your Home Assistant installation.
+#
+# Copy the relevant sections to your configuration.yaml file.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# STEP 1: Create Input Select Helper
+# ------------------------------------------------------------------------------
+# The input_select entity tracks the current mode of the Vitae light.
+# These exact options are required for the blueprint to work correctly.
+# ------------------------------------------------------------------------------
+
+input_select:
+  vitae_light_mode:
+    name: "Vitae Light Mode"
+    options:
+      - "off"      # Light is turned off
+      - "evening"  # Evening mode - warm orange (~2000K)
+      - "day"      # Day mode - neutral white (~4000K)
+      - "night"    # Night mode - cool blue (~6000K)
+    initial: "off"
+    icon: mdi:lightbulb-group
+
+  # Example: Multiple Vitae lights
+  bedroom_vitae_mode:
+    name: "Bedroom Vitae Light"
+    options:
+      - "off"
+      - "evening"
+      - "day"
+      - "night"
+    initial: "off"
+    icon: mdi:lightbulb-group
+
+  living_room_vitae_mode:
+    name: "Living Room Vitae Light"
+    options:
+      - "off"
+      - "evening"
+      - "day"
+      - "night"
+    initial: "off"
+    icon: mdi:lightbulb-group
+
+# ------------------------------------------------------------------------------
+# STEP 2: Configure Blueprint Automation
+# ------------------------------------------------------------------------------
+# Create an automation using the blueprint for each Vitae light.
+# The blueprint handles all the switching logic automatically.
+# ------------------------------------------------------------------------------
+
+automation:
+  # Basic configuration with default timing
+  - use_blueprint:
+      path: vitae_light_control.yaml
+      input:
+        relay_switch: switch.vitae_relay
+        mode_input_select: input_select.vitae_light_mode
+        reset_delay: 15      # Default: 15 seconds
+        switch_delay: 1      # Default: 1 second
+
+  # Example: Custom timing for slower/more reliable switching
+  - use_blueprint:
+      path: vitae_light_control.yaml
+      input:
+        relay_switch: switch.bedroom_vitae
+        mode_input_select: input_select.bedroom_vitae_mode
+        reset_delay: 20      # Longer reset time
+        switch_delay: 1.5    # Slower switching for reliability
+
+  # Example: Faster switching (may be less reliable)
+  - use_blueprint:
+      path: vitae_light_control.yaml
+      input:
+        relay_switch: switch.living_room_vitae
+        mode_input_select: input_select.living_room_vitae_mode
+        reset_delay: 15
+        switch_delay: 0.5    # Faster switching
+
+# ------------------------------------------------------------------------------
+# STEP 3: Additional Automations (Optional)
+# ------------------------------------------------------------------------------
+# Create automations to automatically change modes based on time, presence, etc.
+# ------------------------------------------------------------------------------
+
+automation:
+  # Daily schedule automation
+  - alias: "Vitae Light - Morning Routine"
+    description: "Activate day mode at 7 AM"
+    trigger:
+      - platform: time
+        at: "07:00:00"
+    condition:
+      - condition: state
+        entity_id: input_select.vitae_light_mode
+        state: "evening"
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "day"
+
+  - alias: "Vitae Light - Evening Routine"
+    description: "Activate evening mode at sunset"
+    trigger:
+      - platform: sun
+        event: sunset
+        offset: "+00:30:00"  # 30 minutes after sunset
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "evening"
+
+  - alias: "Vitae Light - Bedtime"
+    description: "Activate night mode at 10 PM"
+    trigger:
+      - platform: time
+        at: "22:00:00"
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "night"
+
+  - alias: "Vitae Light - Sleep Mode"
+    description: "Turn off at 11 PM"
+    trigger:
+      - platform: time
+        at: "23:00:00"
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "off"
+
+  # Motion-based automation
+  - alias: "Vitae Light - Motion Detected"
+    description: "Turn on day mode when motion detected during work hours"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.office_motion
+        to: "on"
+    condition:
+      - condition: time
+        after: "08:00:00"
+        before: "18:00:00"
+      - condition: state
+        entity_id: input_select.vitae_light_mode
+        state: "off"
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "day"
+
+  - alias: "Vitae Light - No Motion"
+    description: "Turn off after 30 minutes of no motion"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.office_motion
+        to: "off"
+        for:
+          minutes: 30
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "off"
+
+  # Presence-based automation
+  - alias: "Vitae Light - Welcome Home"
+    description: "Turn on appropriate mode when arriving home"
+    trigger:
+      - platform: state
+        entity_id: person.john
+        to: "home"
+    action:
+      - choose:
+          # Morning/Daytime - use day mode
+          - conditions:
+              - condition: time
+                after: "06:00:00"
+                before: "18:00:00"
+            sequence:
+              - service: input_select.select_option
+                target:
+                  entity_id: input_select.vitae_light_mode
+                data:
+                  option: "day"
+
+          # Evening - use evening mode
+          - conditions:
+              - condition: time
+                after: "18:00:00"
+                before: "22:00:00"
+            sequence:
+              - service: input_select.select_option
+                target:
+                  entity_id: input_select.vitae_light_mode
+                data:
+                  option: "evening"
+
+          # Night - use night mode
+          - conditions:
+              - condition: time
+                after: "22:00:00"
+            sequence:
+              - service: input_select.select_option
+                target:
+                  entity_id: input_select.vitae_light_mode
+                data:
+                  option: "night"
+        default: []
+
+# ------------------------------------------------------------------------------
+# STEP 4: Scenes (Optional)
+# ------------------------------------------------------------------------------
+# Create scenes that include the Vitae light mode
+# ------------------------------------------------------------------------------
+
+scene:
+  - name: "Movie Time"
+    entities:
+      input_select.vitae_light_mode: "evening"
+      light.tv_backlight: on
+      media_player.living_room_tv: on
+
+  - name: "Reading Mode"
+    entities:
+      input_select.vitae_light_mode: "den"
+      light.reading_lamp: on
+
+  - name: "Work Mode"
+    entities:
+      input_select.vitae_light_mode: "den"
+      light.desk_lamp: on
+      switch.computer: on
+
+  - name: "Sleep Mode"
+    entities:
+      input_select.vitae_light_mode: "noc"
+      light.bedroom_lamp:
+        state: on
+        brightness: 50
+
+  - name: "Good Night"
+    entities:
+      input_select.vitae_light_mode: "off"
+      light.all_lights: off
+
+# ------------------------------------------------------------------------------
+# STEP 5: Scripts (Optional)
+# ------------------------------------------------------------------------------
+# Create reusable scripts for common mode changes
+# ------------------------------------------------------------------------------
+
+script:
+  vitae_set_day_mode:
+    alias: "Vitae - Set Day Mode"
+    sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "day"
+
+  vitae_set_evening_mode:
+    alias: "Vitae - Set Evening Mode"
+    sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "evening"
+
+  vitae_set_night_mode:
+    alias: "Vitae - Set Night Mode"
+    sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "night"
+
+  vitae_turn_off:
+    alias: "Vitae - Turn Off"
+    sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vitae_light_mode
+        data:
+          option: "off"
+
+  vitae_cycle_modes:
+    alias: "Vitae - Cycle Through Modes"
+    description: "Cycle to next mode: off → evening → day → night → off"
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_select.vitae_light_mode
+                state: "off"
+            sequence:
+              - service: input_select.select_option
+                target:
+                  entity_id: input_select.vitae_light_mode
+                data:
+                  option: "evening"
+
+          - conditions:
+              - condition: state
+                entity_id: input_select.vitae_light_mode
+                state: "evening"
+            sequence:
+              - service: input_select.select_option
+                target:
+                  entity_id: input_select.vitae_light_mode
+                data:
+                  option: "day"
+
+          - conditions:
+              - condition: state
+                entity_id: input_select.vitae_light_mode
+                state: "den"
+            sequence:
+              - service: input_select.select_option
+                target:
+                  entity_id: input_select.vitae_light_mode
+                data:
+                  option: "night"
+
+          - conditions:
+              - condition: state
+                entity_id: input_select.vitae_light_mode
+                state: "noc"
+            sequence:
+              - service: input_select.select_option
+                target:
+                  entity_id: input_select.vitae_light_mode
+                data:
+                  option: "off"
+        default: []
+
+# ------------------------------------------------------------------------------
+# NOTES
+# ------------------------------------------------------------------------------
+# 1. Replace entity IDs (switch.vitae_relay, binary_sensor.office_motion, etc.)
+#    with your actual entity IDs
+#
+# 2. Adjust timing values (reset_delay, switch_delay) based on your light's
+#    behavior and reliability requirements
+#
+# 3. The input_select options MUST be exactly: "off", "evening", "day", "night"
+#    (case-sensitive) for the blueprint to work correctly
+#
+# 4. After adding to configuration.yaml, restart Home Assistant or:
+#    - Settings → System → Restart
+#    - Or use the "Reload" buttons in Developer Tools
+#
+# 5. Check Configuration before restarting:
+#    - Settings → System → Check Configuration
+#    - Or Developer Tools → YAML → Check Configuration
+# ------------------------------------------------------------------------------

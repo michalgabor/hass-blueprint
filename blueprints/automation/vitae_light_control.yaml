@@ -1,0 +1,372 @@
+blueprint:
+  name: Vitae Light Control
+  description: |
+    Intelligent control for Vitae biodynamic lights with optimized switching patterns.
+
+    This blueprint manages Vitae lights that cycle through different color temperatures
+    by toggling a relay switch in specific patterns. It supports three color modes:
+    - evening (warm orange)
+    - day (neutral white)
+    - night (cool blue)
+
+    Features:
+    - Automatic reset detection and optimization
+    - Smart switching to minimize unnecessary cycles
+    - Manual switch synchronization
+    - Configurable timing parameters
+
+    Requirements:
+    - An input_select entity with options: "off", "evening", "day", "night"
+    - A switch or light entity controlling the Vitae relay
+
+  domain: automation
+  author: Michal Gabor
+  source_url: https://github.com/yourusername/vitae-light-blueprint
+
+  input:
+    relay_switch:
+      name: Relay Switch
+      description: The relay switch or light entity controlling the Vitae light
+      selector:
+        entity:
+          filter:
+            - domain: switch
+            - domain: light
+
+    mode_input_select:
+      name: Mode Input Select
+      description: |
+        Input select entity to track and control light mode.
+        Must have these exact options: "off", "evening", "day", "night"
+      selector:
+        entity:
+          filter:
+            - domain: input_select
+
+    reset_delay:
+      name: Reset Delay
+      description: |
+        Time to wait for the light to reset to default mode (evening).
+        Minimum 13 seconds recommended by manufacturer.
+        The light automatically resets to evening (warm orange) after being off this long.
+      default: 15
+      selector:
+        number:
+          min: 13
+          max: 30
+          step: 1
+          unit_of_measurement: seconds
+          mode: slider
+
+    switch_delay:
+      name: Switch Delay
+      description: |
+        Delay between switch on/off cycles when changing modes.
+        Shorter delays work faster but may be less reliable.
+      default: 1
+      selector:
+        number:
+          min: 0.5
+          max: 3
+          step: 0.1
+          unit_of_measurement: seconds
+          mode: slider
+
+# This blueprint creates two automations:
+# 1. Mode change handler - switches light modes based on input_select
+# 2. Switch state sync - syncs mode when switch is manually toggled
+
+variables:
+  # Make inputs available as variables
+  relay_switch: !input relay_switch
+  mode_input_select: !input mode_input_select
+  reset_delay: !input reset_delay
+  switch_delay: !input switch_delay
+
+  # Mode position mapping for cycle calculation
+  # evening: 0 (default after reset)
+  # day: 2 (2 switches from reset)
+  # night: 3 (3 switches from reset)
+  # off: -1 (special case)
+  mode_positions:
+    evening: 0
+    day: 2
+    night: 3
+    off: -1
+
+# ============================================================================
+# AUTOMATION 1: Mode Change Handler
+# ============================================================================
+# This automation handles changes to the input_select and executes the
+# appropriate switching sequence to reach the target mode.
+# ============================================================================
+
+trigger:
+  - platform: state
+    entity_id: !input mode_input_select
+    to:
+      - "evening"
+      - "day"
+      - "night"
+      - "off"
+
+condition: []
+
+# Prevent multiple instances from running simultaneously
+mode: single
+max_exceeded: warning
+
+action:
+  - variables:
+      # Get current and target modes
+      target_mode: "{{ trigger.to_state.state }}"
+      previous_mode: "{{ trigger.from_state.state }}"
+
+      # Get mode positions
+      target_pos: >
+        {% set positions = {"evening": 0, "day": 2, "night": 3, "off": -1} %}
+        {{ positions.get(target_mode, -1) }}
+      current_pos: >
+        {% set positions = {"evening": 0, "day": 2, "night": 3, "off": -1} %}
+        {{ positions.get(previous_mode, 0) }}
+
+      # Check if switch is currently off and for how long
+      switch_state: "{{ states(relay_switch) }}"
+      switch_off_duration: >
+        {% if is_state(relay_switch, 'off') %}
+          {{ (now() - states[relay_switch].last_changed).total_seconds() }}
+        {% else %}
+          0
+        {% endif %}
+
+      # Determine if we need a reset (going backward in cycle)
+      needs_reset: "{{ target_pos < current_pos and target_pos != -1 }}"
+
+      # Optimization: Skip reset if switch already off for reset_delay+
+      can_skip_reset: "{{ switch_off_duration >= reset_delay }}"
+
+      # Calculate number of switch cycles needed
+      switches_needed: >
+        {% if target_pos == -1 %}
+          0
+        {% elif target_pos >= current_pos %}
+          {{ target_pos - current_pos }}
+        {% else %}
+          {{ target_pos }}
+        {% endif %}
+
+  # Log the mode change for debugging
+  - service: logbook.log
+    data:
+      name: Vitae Light
+      message: >
+        Mode change: {{ previous_mode }} → {{ target_mode }}
+        (needs_reset: {{ needs_reset }}, can_skip_reset: {{ can_skip_reset }},
+        switches: {{ switches_needed }})
+
+  # Execute the switching sequence
+  - choose:
+      # ========================================================================
+      # CASE 1: Target is OFF - Just turn off the switch
+      # ========================================================================
+      - conditions:
+          - condition: template
+            value_template: "{{ target_mode == 'off' }}"
+        sequence:
+          - service: switch.turn_off
+            target:
+              entity_id: !input relay_switch
+          - service: logbook.log
+            data:
+              name: Vitae Light
+              message: "Turned off"
+
+      # ========================================================================
+      # CASE 2: Forward in cycle (no reset needed)
+      # ========================================================================
+      - conditions:
+          - condition: template
+            value_template: "{{ target_pos >= current_pos and target_pos != -1 }}"
+        sequence:
+          # Ensure switch is on first
+          - service: switch.turn_on
+            target:
+              entity_id: !input relay_switch
+          - delay:
+              seconds: !input switch_delay
+
+          # Perform switch cycles
+          - repeat:
+              count: "{{ switches_needed }}"
+              sequence:
+                - service: switch.turn_off
+                  target:
+                    entity_id: !input relay_switch
+                - delay:
+                    seconds: !input switch_delay
+                - service: switch.turn_on
+                  target:
+                    entity_id: !input relay_switch
+                - delay:
+                    seconds: !input switch_delay
+
+          - service: logbook.log
+            data:
+              name: Vitae Light
+              message: "Switched to {{ target_mode }} ({{ switches_needed }} cycles, no reset)"
+
+      # ========================================================================
+      # CASE 3: Backward in cycle - Reset needed but can skip if already off
+      # ========================================================================
+      - conditions:
+          - condition: template
+            value_template: "{{ needs_reset and can_skip_reset }}"
+        sequence:
+          # Switch is already off long enough, just turn on and cycle
+          - service: switch.turn_on
+            target:
+              entity_id: !input relay_switch
+          - delay:
+              seconds: !input switch_delay
+
+          # Perform switch cycles from reset position (evening)
+          - repeat:
+              count: "{{ target_pos }}"
+              sequence:
+                - service: switch.turn_off
+                  target:
+                    entity_id: !input relay_switch
+                - delay:
+                    seconds: !input switch_delay
+                - service: switch.turn_on
+                  target:
+                    entity_id: !input relay_switch
+                - delay:
+                    seconds: !input switch_delay
+
+          - service: logbook.log
+            data:
+              name: Vitae Light
+              message: "Switched to {{ target_mode }} ({{ target_pos }} cycles, skipped reset)"
+
+      # ========================================================================
+      # CASE 4: Backward in cycle - Need to perform reset
+      # ========================================================================
+      - conditions:
+          - condition: template
+            value_template: "{{ needs_reset and not can_skip_reset }}"
+        sequence:
+          # Turn off and wait for reset
+          - service: switch.turn_off
+            target:
+              entity_id: !input relay_switch
+          - delay:
+              seconds: !input reset_delay
+
+          # Turn on (now at evening position)
+          - service: switch.turn_on
+            target:
+              entity_id: !input relay_switch
+          - delay:
+              seconds: !input switch_delay
+
+          # Perform switch cycles from reset position
+          - repeat:
+              count: "{{ target_pos }}"
+              sequence:
+                - service: switch.turn_off
+                  target:
+                    entity_id: !input relay_switch
+                - delay:
+                    seconds: !input switch_delay
+                - service: switch.turn_on
+                  target:
+                    entity_id: !input relay_switch
+                - delay:
+                    seconds: !input switch_delay
+
+          - service: logbook.log
+            data:
+              name: Vitae Light
+              message: "Switched to {{ target_mode }} ({{ target_pos }} cycles after reset)"
+
+    # Default case - should not happen but ensures switch is on
+    default:
+      - service: switch.turn_on
+        target:
+          entity_id: !input relay_switch
+      - service: logbook.log
+        data:
+          name: Vitae Light
+          message: "Unknown mode transition, ensured switch is on"
+
+---
+
+# ============================================================================
+# AUTOMATION 2: Switch State Sync
+# ============================================================================
+# This automation detects when the switch has been turned off manually
+# (or by another automation) and syncs the mode back to evening after reset.
+# ============================================================================
+
+blueprint:
+  name: Vitae Light - Switch State Sync
+  description: |
+    Internal automation for Vitae Light Control.
+    Syncs the mode input_select when the switch is manually turned off
+    and stays off for the reset duration.
+  domain: automation
+  author: Michal Gabor
+  input:
+    relay_switch:
+      name: Relay Switch
+      selector:
+        entity:
+          filter:
+            - domain: switch
+            - domain: light
+
+    mode_input_select:
+      name: Mode Input Select
+      selector:
+        entity:
+          filter:
+            - domain: input_select
+
+    reset_delay:
+      name: Reset Delay
+      default: 15
+      selector:
+        number:
+          min: 13
+          max: 30
+          step: 1
+          unit_of_measurement: seconds
+
+trigger:
+  - platform: state
+    entity_id: !input relay_switch
+    to: "off"
+    for:
+      seconds: !input reset_delay
+
+condition:
+  # Only sync if mode is not already set to evening or off
+  - condition: template
+    value_template: >
+      {{ states(mode_input_select) not in ['evening', 'off'] }}
+
+mode: single
+
+action:
+  # Light has reset to evening, update the input_select
+  - service: input_select.select_option
+    target:
+      entity_id: !input mode_input_select
+    data:
+      option: "evening"
+
+  - service: logbook.log
+    data:
+      name: Vitae Light
+      message: "Auto-synced to evening after reset"

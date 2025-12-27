@@ -1,0 +1,617 @@
+# ==============================================================================
+# Vitae Light Control - Lovelace Dashboard Examples
+# ==============================================================================
+# This file contains various dashboard card examples for controlling
+# Vitae lights in your Home Assistant Lovelace UI.
+#
+# Copy and paste the desired card configuration into your dashboard.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 1: Simple Entities Card
+# ------------------------------------------------------------------------------
+# Basic control with dropdown selector and switch toggle
+# ------------------------------------------------------------------------------
+
+type: entities
+title: Vitae Light
+entities:
+  - entity: switch.vitae_relay
+    name: Light Switch
+  - entity: input_select.vitae_light_mode
+    name: Light Mode
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 2: Enhanced Entities Card with Icons
+# ------------------------------------------------------------------------------
+# More visual with custom icons and names
+# ------------------------------------------------------------------------------
+
+type: entities
+title: Vitae Biodynamic Light
+icon: mdi:lightbulb-group-outline
+show_header_toggle: false
+entities:
+  - entity: switch.vitae_relay
+    name: Power
+    icon: mdi:power
+  - entity: input_select.vitae_light_mode
+    name: Color Mode
+    icon: mdi:palette
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 3: Horizontal Button Stack
+# ------------------------------------------------------------------------------
+# Quick access buttons for each mode
+# ------------------------------------------------------------------------------
+
+type: horizontal-stack
+cards:
+  - type: button
+    name: "Off"
+    icon: mdi:lightbulb-off
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "off"
+
+  - type: button
+    name: "Evening"
+    icon: mdi:weather-sunset
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "evening"
+
+  - type: button
+    name: "Day"
+    icon: mdi:white-balance-sunny
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "den"
+
+  - type: button
+    name: "Night"
+    icon: mdi:weather-night
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "noc"
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 4: Vertical Stack with Status and Buttons
+# ------------------------------------------------------------------------------
+# Combined card showing current status and mode buttons
+# ------------------------------------------------------------------------------
+
+type: vertical-stack
+cards:
+  - type: entities
+    title: Vitae Light
+    entities:
+      - entity: switch.vitae_relay
+        name: Light Switch
+      - entity: input_select.vitae_light_mode
+        name: Current Mode
+
+  - type: horizontal-stack
+    cards:
+      - type: button
+        name: "Off"
+        icon: mdi:lightbulb-off
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.vitae_light_mode
+          data:
+            option: "off"
+
+      - type: button
+        name: "Evening"
+        icon: mdi:weather-sunset
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.vitae_light_mode
+          data:
+            option: "evening"
+
+      - type: button
+        name: "Day"
+        icon: mdi:white-balance-sunny
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.vitae_light_mode
+          data:
+            option: "day"
+
+      - type: button
+        name: "Night"
+        icon: mdi:weather-night
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.vitae_light_mode
+          data:
+            option: "night"
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 5: Grid Layout with Colored Buttons
+# ------------------------------------------------------------------------------
+# 2x2 grid with custom colors matching each mode
+# Requires card-mod or custom button card (from HACS)
+# ------------------------------------------------------------------------------
+
+type: grid
+columns: 2
+square: false
+cards:
+  - type: button
+    name: "Off"
+    icon: mdi:lightbulb-off
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "off"
+
+  - type: button
+    name: "Evening"
+    icon: mdi:weather-sunset
+    icon_height: 40px
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "evening"
+
+  - type: button
+    name: "Day"
+    icon: mdi:white-balance-sunny
+    icon_height: 40px
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "den"
+
+  - type: button
+    name: "Night"
+    icon: mdi:weather-night
+    icon_height: 40px
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "noc"
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 6: Custom Button Card (Requires HACS)
+# ------------------------------------------------------------------------------
+# Advanced card with custom styling and dynamic colors
+# Install "button-card" from HACS first
+# ------------------------------------------------------------------------------
+
+type: horizontal-stack
+cards:
+  - type: custom:button-card
+    name: "Off"
+    icon: mdi:lightbulb-off
+    color: gray
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "off"
+    styles:
+      card:
+        - height: 80px
+      name:
+        - font-size: 12px
+
+  - type: custom:button-card
+    name: "Evening"
+    icon: mdi:weather-sunset
+    color: orange
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "evening"
+    styles:
+      card:
+        - height: 80px
+      name:
+        - font-size: 12px
+
+  - type: custom:button-card
+    name: "Day"
+    icon: mdi:white-balance-sunny
+    color: yellow
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "den"
+    styles:
+      card:
+        - height: 80px
+      name:
+        - font-size: 12px
+
+  - type: custom:button-card
+    name: "Night"
+    icon: mdi:weather-night
+    color: blue
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "noc"
+    styles:
+      card:
+        - height: 80px
+      name:
+        - font-size: 12px
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 7: Picture Elements Card
+# ------------------------------------------------------------------------------
+# Interactive visual representation with custom positioning
+# ------------------------------------------------------------------------------
+
+type: picture-elements
+image: /local/vitae_light_background.png  # Add your own background image
+elements:
+  - type: state-label
+    entity: input_select.vitae_light_mode
+    style:
+      top: 10%
+      left: 50%
+      color: white
+      font-size: 20px
+
+  - type: state-icon
+    entity: switch.vitae_relay
+    style:
+      top: 30%
+      left: 50%
+
+  - type: icon
+    icon: mdi:lightbulb-off
+    style:
+      top: 70%
+      left: 15%
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "off"
+
+  - type: icon
+    icon: mdi:weather-sunset
+    style:
+      top: 70%
+      left: 38%
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "evening"
+
+  - type: icon
+    icon: mdi:white-balance-sunny
+    style:
+      top: 70%
+      left: 62%
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "den"
+
+  - type: icon
+    icon: mdi:weather-night
+    style:
+      top: 70%
+      left: 85%
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      target:
+        entity_id: input_select.vitae_light_mode
+      data:
+        option: "noc"
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 8: Multiple Lights Dashboard
+# ------------------------------------------------------------------------------
+# Control multiple Vitae lights from one dashboard view
+# ------------------------------------------------------------------------------
+
+type: vertical-stack
+cards:
+  - type: markdown
+    content: "## Vitae Lights Control"
+
+  # Bedroom Light
+  - type: entities
+    title: Bedroom
+    entities:
+      - entity: switch.bedroom_vitae
+        name: Switch
+      - entity: input_select.bedroom_vitae_mode
+        name: Mode
+
+  - type: horizontal-stack
+    cards:
+      - type: button
+        name: "Off"
+        icon: mdi:lightbulb-off
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.bedroom_vitae_mode
+          data:
+            option: "off"
+      - type: button
+        name: "Evening"
+        icon: mdi:weather-sunset
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.bedroom_vitae_mode
+          data:
+            option: "evening"
+      - type: button
+        name: "Day"
+        icon: mdi:white-balance-sunny
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.bedroom_vitae_mode
+          data:
+            option: "day"
+      - type: button
+        name: "Night"
+        icon: mdi:weather-night
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.bedroom_vitae_mode
+          data:
+            option: "night"
+
+  # Living Room Light
+  - type: entities
+    title: Living Room
+    entities:
+      - entity: switch.living_room_vitae
+        name: Switch
+      - entity: input_select.living_room_vitae_mode
+        name: Mode
+
+  - type: horizontal-stack
+    cards:
+      - type: button
+        name: "Off"
+        icon: mdi:lightbulb-off
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.living_room_vitae_mode
+          data:
+            option: "off"
+      - type: button
+        name: "Evening"
+        icon: mdi:weather-sunset
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.living_room_vitae_mode
+          data:
+            option: "evening"
+      - type: button
+        name: "Day"
+        icon: mdi:white-balance-sunny
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.living_room_vitae_mode
+          data:
+            option: "day"
+      - type: button
+        name: "Night"
+        icon: mdi:weather-night
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.living_room_vitae_mode
+          data:
+            option: "night"
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 9: Conditional Card
+# ------------------------------------------------------------------------------
+# Show different controls based on current mode
+# ------------------------------------------------------------------------------
+
+type: conditional
+conditions:
+  - entity: switch.vitae_relay
+    state: "on"
+card:
+  type: vertical-stack
+  cards:
+    - type: markdown
+      content: |
+        ### Current Mode
+        **{{ states('input_select.vitae_light_mode') | title }}**
+
+    - type: horizontal-stack
+      cards:
+        - type: button
+          name: "Evening"
+          icon: mdi:weather-sunset
+          tap_action:
+            action: call-service
+            service: input_select.select_option
+            target:
+              entity_id: input_select.vitae_light_mode
+            data:
+              option: "evening"
+
+        - type: button
+          name: "Day"
+          icon: mdi:white-balance-sunny
+          tap_action:
+            action: call-service
+            service: input_select.select_option
+            target:
+              entity_id: input_select.vitae_light_mode
+            data:
+              option: "day"
+
+        - type: button
+          name: "Night"
+          icon: mdi:weather-night
+          tap_action:
+            action: call-service
+            service: input_select.select_option
+            target:
+              entity_id: input_select.vitae_light_mode
+            data:
+              option: "night"
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 10: Mushroom Cards (Requires HACS)
+# ------------------------------------------------------------------------------
+# Modern, minimalist design using Mushroom cards
+# Install "mushroom" from HACS first
+# ------------------------------------------------------------------------------
+
+type: vertical-stack
+cards:
+  - type: custom:mushroom-title-card
+    title: Vitae Light
+
+  - type: custom:mushroom-entity-card
+    entity: switch.vitae_relay
+    name: Light
+    icon: mdi:lightbulb
+    tap_action:
+      action: toggle
+
+  - type: custom:mushroom-select-card
+    entity: input_select.vitae_light_mode
+    icon: mdi:palette
+
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-template-card
+        primary: "Evening"
+        icon: mdi:weather-sunset
+        icon_color: orange
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.vitae_light_mode
+          data:
+            option: "evening"
+
+      - type: custom:mushroom-template-card
+        primary: "Day"
+        icon: mdi:white-balance-sunny
+        icon_color: yellow
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.vitae_light_mode
+          data:
+            option: "day"
+
+      - type: custom:mushroom-template-card
+        primary: "Night"
+        icon: mdi:weather-night
+        icon_color: blue
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          target:
+            entity_id: input_select.vitae_light_mode
+          data:
+            option: "night"
+
+# ------------------------------------------------------------------------------
+# NOTES
+# ------------------------------------------------------------------------------
+# 1. Replace entity IDs (input_select.vitae_light_mode, switch.vitae_relay)
+#    with your actual entity IDs
+#
+# 2. For custom cards (examples 6, 7, 10), install the required custom
+#    components from HACS:
+#    - button-card: https://github.com/custom-cards/button-card
+#    - mushroom: https://github.com/piitaya/lovelace-mushroom
+#
+# 3. Icons used:
+#    - mdi:lightbulb-off - Off state
+#    - mdi:weather-sunset - Večer (evening, warm orange)
+#    - mdi:white-balance-sunny - Deň (day, neutral white)
+#    - mdi:weather-night - Noc (night, cool blue)
+#
+# 4. Add cards to your dashboard:
+#    - Edit Dashboard → Add Card → Manual (paste YAML)
+#    - Or use Visual Editor and configure manually
+#
+# 5. Test each card after adding to ensure entity IDs are correct
+# ------------------------------------------------------------------------------
