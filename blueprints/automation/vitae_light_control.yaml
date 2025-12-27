@@ -141,8 +141,8 @@ action:
           0
         {% endif %}
 
-      # Determine if we need a reset (going backward in cycle)
-      needs_reset: "{{ target_pos < current_pos and target_pos != -1 }}"
+      # Determine if we need a reset (going backward in cycle OR coming from off state)
+      needs_reset: "{{ (target_pos < current_pos or current_pos == -1) and target_pos != -1 }}"
 
       # Optimization: Skip reset if switch already off for reset_delay+
       can_skip_reset: "{{ switch_off_duration >= reset_delay }}"
@@ -151,6 +151,8 @@ action:
       switches_needed: >
         {% if target_pos == -1 %}
           0
+        {% elif current_pos == -1 %}
+          {{ target_pos }}
         {% elif target_pos >= current_pos %}
           {{ target_pos - current_pos }}
         {% else %}
