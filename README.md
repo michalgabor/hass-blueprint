@@ -109,9 +109,16 @@ The blueprint system uses **two automations** that work together:
 
 **B. Sync Automation (Optional but Recommended)**
 
-1. Import the sync blueprint: **Settings** → **Automations & Scenes** → **Blueprints** → **Import Blueprint**
+[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fmichalgabor%2Fhass-blueprint%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fvitae_light_sync.yaml)
+
+Click the button above to automatically import the sync blueprint into your Home Assistant instance.
+
+**Manual Import:**
+1. Go to **Settings** → **Automations & Scenes** → **Blueprints** → **Import Blueprint**
 2. Use URL: `https://github.com/michalgabor/hass-blueprint/blob/main/blueprints/automation/vitae_light_sync.yaml`
-3. Find **Vitae Light - Switch State Sync** and click **Create Automation**
+
+**Create the automation:**
+1. Find **Vitae Light - Switch State Sync** and click **Create Automation**
 4. Fill in the **same** values as the main automation:
    - **Relay Switch**: Same switch as main automation
    - **Mode Input Select**: Same input_select as main automation
