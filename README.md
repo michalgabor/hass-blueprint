@@ -92,7 +92,11 @@ input_select:
 
 **Important**: The options must be exactly `"off"`, `"evening"`, `"day"`, `"night"` for the blueprint to work correctly.
 
-### Step 2: Create Blueprint Automation
+### Step 2: Create Blueprint Automations
+
+The blueprint system uses **two automations** that work together:
+
+**A. Main Control Automation**
 
 1. Go to **Settings** → **Automations & Scenes** → **Blueprints**
 2. Find **Vitae Light Control** and click **Create Automation**
@@ -101,10 +105,23 @@ input_select:
    - **Mode Input Select**: Select the input_select created above
    - **Reset Delay**: 15 seconds (default, adjust if needed)
    - **Switch Delay**: 1 second (default, adjust if needed)
+4. Click **Save**
 
-Or add directly to `automations.yaml`:
+**B. Sync Automation (Optional but Recommended)**
+
+1. Import the sync blueprint: **Settings** → **Automations & Scenes** → **Blueprints** → **Import Blueprint**
+2. Use URL: `https://github.com/michalgabor/hass-blueprint/blob/main/blueprints/automation/vitae_light_sync.yaml`
+3. Find **Vitae Light - Switch State Sync** and click **Create Automation**
+4. Fill in the **same** values as the main automation:
+   - **Relay Switch**: Same switch as main automation
+   - **Mode Input Select**: Same input_select as main automation
+   - **Reset Delay**: Same value as main automation (default 15s)
+5. Click **Save**
+
+Or add both directly to `automations.yaml`:
 
 ```yaml
+# Main control automation
 - use_blueprint:
     path: vitae_light_control.yaml
     input:
@@ -112,7 +129,17 @@ Or add directly to `automations.yaml`:
       mode_input_select: input_select.vitae_light_mode
       reset_delay: 15
       switch_delay: 1
+
+# Sync automation (optional but recommended)
+- use_blueprint:
+    path: vitae_light_sync.yaml
+    input:
+      relay_switch: switch.vitae_relay
+      mode_input_select: input_select.vitae_light_mode
+      reset_delay: 15
 ```
+
+> **Note**: The sync automation keeps your mode in sync when the switch is toggled manually or by other automations.
 
 ### Step 3: Add to Dashboard
 
@@ -316,13 +343,14 @@ automation:
 
 Recreate the input_select with the correct options.
 
-### Blueprint creates two automations
+### Do I need both blueprints?
 
-**Note**: This is intentional! The blueprint creates:
-1. **Mode Change Handler** - Manages switching sequences
-2. **Switch State Sync** - Syncs mode when switch is manually toggled
+**Answer**: The main blueprint (**Vitae Light Control**) is required. The sync blueprint (**Vitae Light - Switch State Sync**) is optional but recommended.
 
-Both automations work together to provide seamless control.
+- **Main blueprint**: Handles mode switching when you change the input_select
+- **Sync blueprint**: Keeps the input_select in sync when the switch is toggled manually
+
+Without the sync blueprint, manual switch control will still work, but the input_select won't update automatically.
 
 ## Advanced Configuration
 

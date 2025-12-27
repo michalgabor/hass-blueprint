@@ -1,0 +1,74 @@
+blueprint:
+  name: Vitae Light - Switch State Sync
+  description: |
+    Companion blueprint for Vitae Light Control.
+
+    This blueprint syncs the mode input_select when the relay switch is manually
+    turned off and stays off for the reset duration. The light automatically
+    resets to evening mode after being off for 13+ seconds.
+
+    **Important**: Use this together with the main "Vitae Light Control" blueprint.
+
+  domain: automation
+  author: Michal Gabor
+  source_url: https://github.com/michalgabor/hass-blueprint
+
+  input:
+    relay_switch:
+      name: Relay Switch
+      description: The same relay switch used in the main Vitae Light Control blueprint
+      selector:
+        entity:
+          filter:
+            - domain: switch
+            - domain: light
+
+    mode_input_select:
+      name: Mode Input Select
+      description: The same input_select used in the main Vitae Light Control blueprint
+      selector:
+        entity:
+          filter:
+            - domain: input_select
+
+    reset_delay:
+      name: Reset Delay
+      description: |
+        Time to wait before considering the light has reset.
+        Should match the reset_delay in the main blueprint.
+      default: 15
+      selector:
+        number:
+          min: 13
+          max: 30
+          step: 1
+          unit_of_measurement: seconds
+          mode: slider
+
+trigger:
+  - platform: state
+    entity_id: !input relay_switch
+    to: "off"
+    for:
+      seconds: !input reset_delay
+
+condition:
+  # Only sync if mode is not already set to evening or off
+  - condition: template
+    value_template: >
+      {{ states(mode_input_select) not in ['evening', 'off'] }}
+
+mode: single
+
+action:
+  # Light has reset to evening, update the input_select
+  - service: input_select.select_option
+    target:
+      entity_id: !input mode_input_select
+    data:
+      option: "evening"
+
+  - service: logbook.log
+    data:
+      name: Vitae Light Sync
+      message: "Auto-synced to evening after reset ({{ trigger.for }})"

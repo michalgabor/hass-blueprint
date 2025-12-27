@@ -12,8 +12,10 @@ blueprint:
     Features:
     - Automatic reset detection and optimization
     - Smart switching to minimize unnecessary cycles
-    - Manual switch synchronization
     - Configurable timing parameters
+
+    **Optional companion blueprint**: For automatic sync when the switch is toggled manually,
+    also install the "Vitae Light - Switch State Sync" blueprint from this repository.
 
     Requirements:
     - An input_select entity with options: "off", "evening", "day", "night"
@@ -299,74 +301,3 @@ action:
         data:
           name: Vitae Light
           message: "Unknown mode transition, ensured switch is on"
-
----
-
-# ============================================================================
-# AUTOMATION 2: Switch State Sync
-# ============================================================================
-# This automation detects when the switch has been turned off manually
-# (or by another automation) and syncs the mode back to evening after reset.
-# ============================================================================
-
-blueprint:
-  name: Vitae Light - Switch State Sync
-  description: |
-    Internal automation for Vitae Light Control.
-    Syncs the mode input_select when the switch is manually turned off
-    and stays off for the reset duration.
-  domain: automation
-  author: Michal Gabor
-  input:
-    relay_switch:
-      name: Relay Switch
-      selector:
-        entity:
-          filter:
-            - domain: switch
-            - domain: light
-
-    mode_input_select:
-      name: Mode Input Select
-      selector:
-        entity:
-          filter:
-            - domain: input_select
-
-    reset_delay:
-      name: Reset Delay
-      default: 15
-      selector:
-        number:
-          min: 13
-          max: 30
-          step: 1
-          unit_of_measurement: seconds
-
-trigger:
-  - platform: state
-    entity_id: !input relay_switch
-    to: "off"
-    for:
-      seconds: !input reset_delay
-
-condition:
-  # Only sync if mode is not already set to evening or off
-  - condition: template
-    value_template: >
-      {{ states(mode_input_select) not in ['evening', 'off'] }}
-
-mode: single
-
-action:
-  # Light has reset to evening, update the input_select
-  - service: input_select.select_option
-    target:
-      entity_id: !input mode_input_select
-    data:
-      option: "evening"
-
-  - service: logbook.log
-    data:
-      name: Vitae Light
-      message: "Auto-synced to evening after reset"
