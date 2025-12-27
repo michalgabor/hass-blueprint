@@ -5,7 +5,7 @@ blueprint:
 
     This blueprint syncs the mode input_select when the relay switch is manually
     turned off and stays off for the reset duration. The light automatically
-    resets to evening mode after being off for 13+ seconds.
+    resets to night mode after being off for 13+ seconds.
 
     **Important**: Use this together with the main "Vitae Light Control" blueprint.
 
@@ -53,22 +53,22 @@ trigger:
       seconds: !input reset_delay
 
 condition:
-  # Only sync if mode is not already set to evening or off
+  # Only sync if mode is not already set to night or off
   - condition: template
     value_template: >
-      {{ states(mode_input_select) not in ['evening', 'off'] }}
+      {{ states(mode_input_select) not in ['night', 'off'] }}
 
 mode: single
 
 action:
-  # Light has reset to evening, update the input_select
+  # Light has reset to night, update the input_select
   - service: input_select.select_option
     target:
       entity_id: !input mode_input_select
     data:
-      option: "evening"
+      option: "night"
 
   - service: logbook.log
     data:
       name: Vitae Light Sync
-      message: "Auto-synced to evening after reset ({{ trigger.for }})"
+      message: "Auto-synced to night after reset ({{ trigger.for }})"

@@ -20,22 +20,22 @@ Intelligent Home Assistant blueprint for controlling Vitae biodynamic lights wit
 
 Vitae biodynamic lights cycle through different color temperatures by toggling the power in specific patterns:
 
-1. **Reset Mechanism**: When powered off for 13+ seconds, the light resets to **evening** (warm orange)
+1. **Reset Mechanism**: When powered off for 13+ seconds, the light resets to **night** (cool blue)
 2. **Mode Switching**: Each power cycle (off→on) advances to the next color mode
-3. **Cycle Order**: evening (0) → intermediate (1) → day (2) → night (3) → back to evening
+3. **Cycle Order**: night (0) → evening (1) → day (2) → back to night
 
 This blueprint intelligently manages these cycles to minimize switching time.
 
 ## Time Savings
 
-Traditional approach requires resetting to evening for every mode change. This blueprint optimizes by:
+Traditional approach requires resetting to night for every mode change. This blueprint optimizes by:
 
 | Transition | Traditional | Optimized | Time Saved |
 |------------|-------------|-----------|------------|
-| evening → evening | ~19s | <1s | **96%** |
-| evening → day | ~19s | ~5s | **74%** |
-| day → night | ~22s | ~3s | **87%** |
-| night → day | ~22s | ~5s | **77%** |
+| night → night | ~17s | <1s | **96%** |
+| night → evening | ~17s | ~3s | **82%** |
+| evening → day | ~19s | ~3s | **84%** |
+| day → night | ~20s | ~5s | **75%** |
 
 **Average time savings: 58%**
 
@@ -240,9 +240,9 @@ automation:
 
 | Mode | Color Temperature | Use Case | Position |
 |------|-------------------|----------|----------|
-| **evening** | Warm Orange (~2000K) | Evening relaxation, before bed | 0 (default) |
+| **night** | Cool Blue (~6000K) | Night reading, concentration | 0 (default) |
+| **evening** | Warm Orange (~2000K) | Evening relaxation, before bed | 1 |
 | **day** | Neutral White (~4000K) | Daytime activities, work | 2 |
-| **night** | Cool Blue (~6000K) | Night reading, concentration | 3 |
 | **off** | - | Turn off the light | -1 |
 
 ### Example Automation Scenarios
@@ -320,7 +320,7 @@ automation:
 
 **Problem**: Manually toggled the switch and now mode is out of sync.
 
-**Solution**: The blueprint includes automatic sync. If the switch is off for 15+ seconds, the mode will automatically reset to "evening". You can also manually set the input_select to match the current state.
+**Solution**: The blueprint includes automatic sync. If the switch is off for 15+ seconds, the mode will automatically reset to "night". You can also manually set the input_select to match the current state.
 
 ### Switching is too slow/fast
 
@@ -417,11 +417,11 @@ scene:
 
 Run these test cases to verify everything works:
 
-1. **Forward Cycle Test**: evening → day (should take ~5s, no reset)
-2. **Backward Cycle Test**: day → evening (should detect reset needed)
-3. **Off State Test**: night → off → evening (verify off state works)
-4. **Reset Optimization Test**: Turn off light manually, wait 15s, then change to den (should skip reset)
-5. **Manual Sync Test**: Toggle switch manually off for 15s (should auto-sync to evening)
+1. **Forward Cycle Test**: night → evening (should take ~3s, no reset)
+2. **Backward Cycle Test**: day → night (should detect reset needed)
+3. **Off State Test**: evening → off → night (verify off state works)
+4. **Reset Optimization Test**: Turn off light manually, wait 15s, then change to day (should skip reset)
+5. **Manual Sync Test**: Toggle switch manually off for 15s (should auto-sync to night)
 
 ## Technical Details
 
@@ -456,10 +456,10 @@ else:
 ### Mode Position Mapping
 
 ```yaml
-evening: 0   # Default after reset
+night: 0     # Default after reset (first power on)
+evening: 1   # 1 cycle from reset
 day: 2       # 2 cycles from reset
-night: 3     # 3 cycles from reset
-off: -1    # Special case
+off: -1      # Special case
 ```
 
 ### Automation Modes

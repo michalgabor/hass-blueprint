@@ -78,7 +78,7 @@ cards:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "den"
+        option: "day"
 
   - type: button
     name: "Night"
@@ -89,7 +89,7 @@ cards:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "noc"
+        option: "night"
 
 # ------------------------------------------------------------------------------
 # EXAMPLE 4: Vertical Stack with Status and Buttons
@@ -197,7 +197,7 @@ cards:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "den"
+        option: "day"
 
   - type: button
     name: "Night"
@@ -209,7 +209,7 @@ cards:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "noc"
+        option: "night"
 
 # ------------------------------------------------------------------------------
 # EXAMPLE 6: Custom Button Card (Requires HACS)
@@ -264,7 +264,7 @@ cards:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "den"
+        option: "day"
     styles:
       card:
         - height: 80px
@@ -281,7 +281,7 @@ cards:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "noc"
+        option: "night"
     styles:
       card:
         - height: 80px
@@ -348,7 +348,7 @@ elements:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "den"
+        option: "day"
 
   - type: icon
     icon: mdi:weather-night
@@ -361,7 +361,7 @@ elements:
       target:
         entity_id: input_select.vitae_light_mode
       data:
-        option: "noc"
+        option: "night"
 
 # ------------------------------------------------------------------------------
 # EXAMPLE 8: Multiple Lights Dashboard

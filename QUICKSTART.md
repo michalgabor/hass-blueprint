@@ -135,18 +135,18 @@ cards:
 
 ## Test It Out!
 
-1. Click the **Evening** button - light should turn on in warm orange
-2. Click **Day** - light should switch to neutral white (~5 seconds)
-3. Click **Night** - light should switch to cool blue (~3 seconds)
+1. Click the **Night** button - light should turn on in cool blue
+2. Click **Evening** - light should switch to warm orange (~3 seconds)
+3. Click **Day** - light should switch to neutral white (~3 seconds)
 4. Click **Off** - light should turn off
 
 ## Mode Reference
 
 | Mode | Color | Icon | Best For |
 |------|-------|------|----------|
+| **Night** | Cool Blue | 🌙 | Night reading, focus |
 | **Evening** | Warm Orange | 🌅 | Evening, before bed |
 | **Day** | Neutral White | ☀️ | Daytime, work |
-| **Night** | Cool Blue | 🌙 | Night reading, focus |
 | **Off** | - | 💡 | No light needed |
 
 ## Common Customizations
@@ -198,8 +198,8 @@ If your light needs different timing, edit the blueprint automation:
 
 **Switching too slow?**
 - This is normal - blueprint optimizes automatically
-- evening→day takes ~5s, day→night takes ~3s
-- Much faster than traditional method (15-22s)
+- night→evening takes ~3s, evening→day takes ~3s
+- Much faster than traditional method (17-23s)
 
 ## Next Steps
 

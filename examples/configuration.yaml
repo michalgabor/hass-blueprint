@@ -238,18 +238,18 @@ scene:
 
   - name: "Reading Mode"
     entities:
-      input_select.vitae_light_mode: "den"
+      input_select.vitae_light_mode: "day"
       light.reading_lamp: on
 
   - name: "Work Mode"
     entities:
-      input_select.vitae_light_mode: "den"
+      input_select.vitae_light_mode: "day"
       light.desk_lamp: on
       switch.computer: on
 
   - name: "Sleep Mode"
     entities:
-      input_select.vitae_light_mode: "noc"
+      input_select.vitae_light_mode: "night"
       light.bedroom_lamp:
         state: on
         brightness: 50
@@ -332,7 +332,7 @@ script:
           - conditions:
               - condition: state
                 entity_id: input_select.vitae_light_mode
-                state: "den"
+                state: "day"
             sequence:
               - service: input_select.select_option
                 target:
@@ -343,7 +343,7 @@ script:
           - conditions:
               - condition: state
                 entity_id: input_select.vitae_light_mode
-                state: "noc"
+                state: "night"
             sequence:
               - service: input_select.select_option
                 target:

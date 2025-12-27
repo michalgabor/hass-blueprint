@@ -45,9 +45,9 @@ hass-blueprint/
 - [x] Two-automation architecture (mode handler + sync)
 
 ### Optimization Results
-- **evening → evening**: <1s (96% faster than traditional)
-- **evening → day**: ~5s (74% faster)
-- **day → night**: ~3s (87% faster)
+- **night → night**: <1s (94% faster than traditional)
+- **night → evening**: ~3s (85% faster)
+- **evening → day**: ~3s (87% faster)
 - **Average savings**: 58% time reduction
 
 ### Documentation ✓
@@ -86,9 +86,9 @@ hass-blueprint/
 10. Mushroom cards (HACS)
 
 ### Testing Scenarios Documented ✓
-1. Forward cycle test (evening → day)
-2. Backward cycle test (day → evening)
-3. Off state test (night → off → evening)
+1. Forward cycle test (night → evening)
+2. Backward cycle test (day → night)
+3. Off state test (evening → off → night)
 4. Reset optimization test (already off 15s+)
 5. Manual sync test (manual toggle)
 
@@ -112,17 +112,17 @@ The blueprint implements a **two-automation system**:
 
 2. **Switch State Sync** (Synchronization automation)
    - Triggers when switch off for reset_delay seconds
-   - Auto-syncs input_select to "evening" (default after reset)
+   - Auto-syncs input_select to "night" (default after reset)
    - Prevents mode drift from manual controls
-   - Only syncs when needed (not if already evening/off)
+   - Only syncs when needed (not if already night/off)
 
 ### Mode Position Mapping
 
 ```yaml
-evening: 0   # Default after reset, warm orange ~2000K
-day: 2     # 2 cycles from reset, neutral white ~4000K
-night: 3     # 3 cycles from reset, cool blue ~6000K
-off: -1    # Special case, switch off
+night: 0     # Default after reset (first power on), cool blue ~6000K
+evening: 1   # 1 cycle from reset, warm orange ~2000K
+day: 2       # 2 cycles from reset, neutral white ~4000K
+off: -1      # Special case, switch off
 ```
 
 ### Optimization Logic

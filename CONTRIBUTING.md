@@ -84,9 +84,9 @@ We welcome pull requests for:
 
 Before submitting changes, verify these scenarios:
 
-- [ ] evening → day (forward cycle)
-- [ ] day → evening (backward cycle with reset)
-- [ ] night → off (turn off)
+- [ ] night → evening (forward cycle)
+- [ ] day → night (backward cycle with reset)
+- [ ] evening → off (turn off)
 - [ ] Manual switch toggle (sync test)
 - [ ] Reset skip optimization (switch already off 15s+)
 - [ ] All modes work correctly
@@ -146,9 +146,9 @@ Timing is critical for Vitae lights:
 
 The mode position mapping is fundamental:
 ```yaml
-evening: 0   # Default after reset
-day: 2     # 2 cycles from reset
-night: 3     # 3 cycles from reset
+night: 0     # Default after reset (first power on)
+evening: 1   # 1 cycle from reset
+day: 2       # 2 cycles from reset
 ```
 
 Changes here affect all switching logic. Discuss in an issue first.

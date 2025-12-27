@@ -48,9 +48,9 @@ blueprint:
     reset_delay:
       name: Reset Delay
       description: |
-        Time to wait for the light to reset to default mode (evening).
+        Time to wait for the light to reset to default mode (night).
         Minimum 13 seconds recommended by manufacturer.
-        The light automatically resets to evening (warm orange) after being off this long.
+        The light automatically resets to night (cool blue) after being off this long.
       default: 15
       selector:
         number:
@@ -86,14 +86,14 @@ variables:
   switch_delay: !input switch_delay
 
   # Mode position mapping for cycle calculation
-  # evening: 0 (default after reset)
+  # night: 0 (default after reset - first power on)
+  # evening: 1 (1 switch from reset)
   # day: 2 (2 switches from reset)
-  # night: 3 (3 switches from reset)
   # off: -1 (special case)
   mode_positions:
-    evening: 0
+    night: 0
+    evening: 1
     day: 2
-    night: 3
     off: -1
 
 # ============================================================================
@@ -126,10 +126,10 @@ action:
 
       # Get mode positions
       target_pos: >
-        {% set positions = {"evening": 0, "day": 2, "night": 3, "off": -1} %}
+        {% set positions = {"night": 0, "evening": 1, "day": 2, "off": -1} %}
         {{ positions.get(target_mode, -1) }}
       current_pos: >
-        {% set positions = {"evening": 0, "day": 2, "night": 3, "off": -1} %}
+        {% set positions = {"night": 0, "evening": 1, "day": 2, "off": -1} %}
         {{ positions.get(previous_mode, 0) }}
 
       # Check if switch is currently off and for how long
@@ -231,7 +231,7 @@ action:
           - delay:
               seconds: !input switch_delay
 
-          # Perform switch cycles from reset position (evening)
+          # Perform switch cycles from reset position (night = 0)
           - repeat:
               count: "{{ target_pos }}"
               sequence:
@@ -265,14 +265,14 @@ action:
           - delay:
               seconds: !input reset_delay
 
-          # Turn on (now at evening position)
+          # Turn on (now at night position - reset default)
           - service: switch.turn_on
             target:
               entity_id: !input relay_switch
           - delay:
               seconds: !input switch_delay
 
-          # Perform switch cycles from reset position
+          # Perform switch cycles from reset position (night = 0)
           - repeat:
               count: "{{ target_pos }}"
               sequence:

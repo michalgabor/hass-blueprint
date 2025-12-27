@@ -26,15 +26,15 @@ Vitae lights are special LED lights designed to mimic natural daylight cycles. T
 Vitae lights are controlled by a simple relay switch, but they have built-in intelligence:
 
 1. **Power Cycling**: Each time you toggle the power (off → on), the light advances to the next color mode
-2. **Reset Mechanism**: If you turn the light off for 13+ seconds, it automatically resets to the default mode (evening - warm orange)
+2. **Reset Mechanism**: If you turn the light off for 13+ seconds, it automatically resets to the default mode (night - cool blue)
 3. **Mode Sequence**: The light cycles through modes in this order:
-   - evening (warm orange) → intermediate → day (neutral white) → night (cool blue) → back to evening
+   - night (cool blue) → evening (warm orange) → day (neutral white) → back to night
 
 ### The Challenge
 
 Without smart control, changing modes is tedious:
-- To go from night → evening: Turn off, wait 15 seconds, turn on (slow!)
-- To go from evening → day: Turn off, wait 15 seconds, turn on, toggle twice (complex!)
+- To go from day → night: Turn off, wait 15 seconds, turn on (slow!)
+- To go from day → evening: Turn off, wait 15 seconds, turn on, toggle once (complex!)
 
 ### The Solution
 
@@ -44,9 +44,20 @@ This blueprint automates the entire process and optimizes switching to save time
 
 ## Mode Descriptions
 
+### Night (Night Mode)
+- **Color**: Cool Blue (~6000K)
+- **Position**: 0 (default after reset - first power on)
+- **Icon**: 🌙 Moon
+- **Use Cases**:
+  - Night reading
+  - Focus and concentration
+  - Late-night work
+  - Alert wakefulness
+- **Biological Effect**: Suppresses melatonin, increases alertness
+
 ### Evening (Evening Mode)
 - **Color**: Warm Orange (~2000K)
-- **Position**: 0 (default after reset)
+- **Position**: 1 (1 cycle from reset)
 - **Icon**: 🌅 Sunset
 - **Use Cases**:
   - Evening relaxation
@@ -65,17 +76,6 @@ This blueprint automates the entire process and optimizes switching to save time
   - General lighting
   - Morning routines
 - **Biological Effect**: Supports alertness and energy during the day
-
-### Night (Night Mode)
-- **Color**: Cool Blue (~6000K)
-- **Position**: 3 (3 cycles from reset)
-- **Icon**: 🌙 Moon
-- **Use Cases**:
-  - Night reading
-  - Focus and concentration
-  - Late-night work
-  - Alert wakefulness
-- **Biological Effect**: Suppresses melatonin, increases alertness
 
 ### Off
 - **State**: Light turned off
@@ -98,7 +98,7 @@ The blueprint creates **two automations** that work together:
 
 #### 2. Switch State Sync
 - **Triggered by**: Relay switch turning off for 15+ seconds
-- **Function**: Syncs the input_select back to "evening" (default after reset)
+- **Function**: Syncs the input_select back to "night" (default after reset)
 - **Purpose**: Keeps everything in sync when switch is toggled manually
 
 ### Decision Logic
@@ -115,10 +115,10 @@ When you select a new mode, the blueprint:
 ### Mode Position Mapping
 
 ```
-evening = 0   (default after reset)
-day   = 2   (2 switches from evening)
-night   = 3   (3 switches from evening)
-off   = -1  (special case, just turn off)
+night   = 0   (default after reset - first power on)
+evening = 1   (1 switch from night)
+day     = 2   (2 switches from night)
+off     = -1  (special case, just turn off)
 ```
 
 ---
@@ -131,15 +131,15 @@ Without optimization, every backward movement requires a full reset:
 
 | From | To | Steps | Time |
 |------|----|----|------|
-| evening | evening | Reset + 0 cycles | ~15s |
-| evening | day | Reset + 2 cycles | ~19s |
-| evening | night | Reset + 3 cycles | ~22s |
-| day | evening | Reset + 0 cycles | ~15s |
-| day | night | 1 cycle forward | ~3s |
-| night | evening | Reset + 0 cycles | ~15s |
-| night | day | Reset + 2 cycles | ~19s |
+| night | night | Reset + 0 cycles | ~17s |
+| night | evening | Reset + 1 cycle | ~20s |
+| evening | day | Reset + 2 cycles | ~23s |
+| day | night | Reset + 0 cycles | ~17s |
+| night | day | 2 cycles forward | ~6s |
+| evening | night | Reset + 0 cycles | ~17s |
+| day | evening | Reset + 1 cycle | ~20s |
 
-**Average time: ~15.3 seconds**
+**Average time: ~17.1 seconds**
 
 ### The Solution: Smart Optimization
 
@@ -149,11 +149,11 @@ The blueprint optimizes in three ways:
 When moving forward in the cycle, no reset is needed:
 
 ```
-evening (0) → day (2): Just 2 cycles = ~5s
-day (2) → night (3): Just 1 cycle = ~3s
+night (0) → evening (1): Just 1 cycle = ~3s
+evening (1) → day (2): Just 1 cycle = ~3s
 ```
 
-**Time saved: ~74-87%**
+**Time saved: ~85%**
 
 #### 2. Reset Skip Detection
 If the switch is already off for 15+ seconds, skip the reset wait:
@@ -179,13 +179,13 @@ Optimized:  Just turn off the relay
 
 | Transition | Traditional | Optimized | Saved | % Saved |
 |------------|-------------|-----------|-------|---------|
-| evening → evening | ~15s | <1s | ~14s | **96%** |
-| evening → day | ~19s | ~5s | ~14s | **74%** |
-| evening → night | ~22s | ~7s | ~15s | **68%** |
-| day → evening | ~15s | ~5s* | ~10s | **67%** |
-| day → night | ~22s | ~3s | ~19s | **87%** |
-| night → evening | ~15s | <1s* | ~14s | **93%** |
-| night → day | ~19s | ~5s* | ~14s | **74%** |
+| night → night | ~17s | <1s | ~16s | **94%** |
+| night → evening | ~20s | ~3s | ~17s | **85%** |
+| evening → day | ~23s | ~3s | ~20s | **87%** |
+| day → night | ~17s | ~5s* | ~12s | **71%** |
+| day → evening | ~20s | ~5s* | ~15s | **75%** |
+| evening → night | ~17s | <1s* | ~16s | **94%** |
+| night → day | ~23s | ~6s | ~17s | **74%** |
 | any → off | ~3s | <1s | ~2s | **67%** |
 
 *Assumes reset skip optimization applies (switch already off 15+ seconds)
